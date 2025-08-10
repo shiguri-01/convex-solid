@@ -1,27 +1,91 @@
-import type { Component } from 'solid-js';
+import { faker } from "@faker-js/faker";
+import {
+	type Component,
+	createEffect,
+	createSignal,
+	Index,
+	on,
+} from "solid-js";
+import { api } from "../convex/_generated/api";
+import { createMutation, createQuery } from "./lib/convex";
 
-import logo from './logo.svg';
-import styles from './App.module.css';
+// デモのために、適当な名前をセッションストレージに保存
+const NAME = getOrSetFakeName();
 
 const App: Component = () => {
-  return (
-    <div class={styles.App}>
-      <header class={styles.header}>
-        <img src={logo} class={styles.logo} alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          class={styles.link}
-          href="https://github.com/solidjs/solid"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn Solid
-        </a>
-      </header>
-    </div>
-  );
+	const messages = createQuery(api.chat.getMessages);
+	const sendMessage = createMutation(api.chat.sendMessage);
+
+	const [newMessageText, setNewMessageText] = createSignal("");
+
+	createEffect(
+		on(
+			() => messages(),
+			() => {
+				setTimeout(() => {
+					window.scrollTo({
+						top: document.body.scrollHeight,
+						behavior: "smooth",
+					});
+				}, 0);
+			},
+		),
+	);
+
+	return (
+		<main class="chat">
+			<header>
+				<h1>Convex Chat</h1>
+				<p>
+					Connected as <strong>{NAME}</strong>
+				</p>
+			</header>
+			<Index each={messages()}>
+				{(message) => (
+					<article class={message().user === NAME ? "message-mine" : ""}>
+						<div>{message().user}</div>
+
+						<p>{message().body}</p>
+					</article>
+				)}
+			</Index>
+			<form
+				onSubmit={async (e) => {
+					e.preventDefault();
+					await sendMessage({ user: NAME, body: newMessageText() });
+					setNewMessageText("");
+				}}
+			>
+				<input
+					type="text"
+					value={newMessageText()}
+					onChange={async (e) => {
+						{
+							const text = e.currentTarget.value;
+							setNewMessageText(text);
+							console.log(newMessageText());
+						}
+					}}
+					placeholder="Write a message..."
+					autofocus
+				/>
+				<button type="submit" disabled={!newMessageText()}>
+					Send
+				</button>
+			</form>
+		</main>
+	);
 };
 
 export default App;
+
+function getOrSetFakeName() {
+	const NAME_KEY = "tutorial_name";
+	const name = sessionStorage.getItem(NAME_KEY);
+	if (!name) {
+		const newName = faker.person.firstName();
+		sessionStorage.setItem(NAME_KEY, newName);
+		return newName;
+	}
+	return name;
+}
