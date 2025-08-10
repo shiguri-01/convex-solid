@@ -1,21 +1,26 @@
 {
-  "name": "vite-template-solid",
-  "version": "0.0.0",
-  "description": "",
-  "type": "module",
-  "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
-  },
-  "license": "MIT",
-  "devDependencies": {
-    "typescript": "^5.7.2",
-    "vite": "^6.0.0",
-    "vite-plugin-solid": "^2.11.6"
-  },
-  "dependencies": {
-    "solid-js": "^1.9.5"
-  }
+	"name": "vite-template-solid",
+	"version": "0.0.0",
+	"description": "",
+	"type": "module",
+	"scripts": {
+		"start": "vite",
+		"dev": "npm-run-all --parallel dev:backend dev:frontend",
+		"dev:frontend": "vite",
+		"dev:backend": "convex dev",
+		"predev": "convex dev --once",
+		"build": "vite build",
+		"serve": "vite preview"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"npm-run-all2": "^8.0.4",
+		"typescript": "^5.7.2",
+		"vite": "^6.0.0",
+		"vite-plugin-solid": "^2.11.6"
+	},
+	"dependencies": {
+		"convex": "^1.25.4",
+		"solid-js": "^1.9.5"
+	}
 }
